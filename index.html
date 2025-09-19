@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Handwriting to Font Notes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin: 20px;
+    }
+    canvas {
+      border: 2px solid #444;
+      border-radius: 8px;
+      background: #fff;
+      cursor: crosshair;
+    }
+    .controls {
+      margin: 15px;
+    }
+    button, select {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #444;
+      background: #fff;
+      cursor: pointer;
+    }
+    #notes {
+      margin-top: 20px;
+      width: 90%;
+      max-width: 600px;
+    }
+    .note {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📝 Handwriting to Font Notes</h1>
+  <canvas id="canvas" width="500" height="300"></canvas>
+  <div class="controls">
+    <button onclick="clearCanvas()">Clear</button>
+    <button onclick="saveNote()">Save as Note</button>
+    <select id="fontSelect">
+      <option value="Arial">Arial</option>
+      <option value="Times New Roman">Times New Roman</option>
+      <option value="Courier New">Courier New</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Verdana">Verdana</option>
+      <option value="Comic Sans MS">Comic Sans</option>
+    </select>
+  </div>
+  <div id="notes">
+    <h2>Saved Notes</h2>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let drawing = false;
+
+    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mouseup", stopDraw);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("touchstart", startTouch, { passive: false });
+    canvas.addEventListener("touchmove", moveTouch, { passive: false });
+    canvas.addEventListener("touchend", stopDraw);
+
+    function startDraw(e) {
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    }
+
+    function stopDraw() {
+      drawing = false;
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#000";
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+    }
+
+    function startTouch(e) {
+      e.preventDefault();
+      drawing = true;
+      const touch = e.touches[0];
+      ctx.beginPath();
+      ctx.moveTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
+    }
+
+    function moveTouch(e) {
+      e.preventDefault();
+      if (!drawing) return;
+      const touch = e.touches[0];
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#000";
+      ctx.lineTo(touch.clientX - canvas.offsetLeft, touch.clientY - canvas.offsetTop);
+      ctx.stroke();
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function saveNote() {
+      const font = document.getElementById("fontSelect").value;
+      const noteText = prompt("Enter text for this note (based on your handwriting):");
+      if (noteText) {
+        const notesDiv = document.getElementById("notes");
+        const note = document.createElement("div");
+        note.classList.add("note");
+        note.style.fontFamily = font;
+        note.innerText = noteText;
+        notesDiv.appendChild(note);
+      }
+      clearCanvas();
+    }
+  </script>
+</body>
+</html>
